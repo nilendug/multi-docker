@@ -1,0 +1,29 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t nilendug/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run nilendug/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t nilendug/multi-client ./client
+  - docker build -t nilendug/multi-nginx ./nginx
+  - docker build -t nilendug/multi-server ./server
+  - docker build -t nilendug/multi-worker ./worker
+
+# Login in to the docker CLI
+  - echo "DOCKER_PASSWORD" | docker login -u "DOCKER_ID" --password-stdin
+
+# Take those images and push them to the docker hub
+  - docker push nilendug/multi-client
+  - docker push nilendug/multi-nginx
+  - docker push nilendug/multi-server
+  - docker push nilendug/multi-worker
+  
+
+
+
+
